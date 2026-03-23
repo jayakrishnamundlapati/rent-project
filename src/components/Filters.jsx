@@ -5,7 +5,6 @@ const Filters = ({ filters, setFilters }) => {
 
   const handleClear = () => {
     setFilters({
-      stayType: '',
       sortBy: '',
       sharingType: '',
       gender: '',
@@ -34,21 +33,6 @@ const Filters = ({ filters, setFilters }) => {
       <div className="filters-header">
         <h3>Filters</h3>
         <button className="clear-btn" onClick={handleClear}>Clear Filters</button>
-      </div>
-
-      {/* Stay Type */}
-      <div className="filter-section">
-        <h4>Stay Type</h4>
-        <div className="radio-group">
-          <label className="radio-label">
-            <input type="radio" name="stayType" checked={filters.stayType === 'Coliving'} onChange={() => handleChange('stayType', 'Coliving')} />
-            <span className="radio-custom"></span> Coliving
-          </label>
-          <label className="radio-label">
-            <input type="radio" name="stayType" checked={filters.stayType === 'Student Living'} onChange={() => handleChange('stayType', 'Student Living')} />
-            <span className="radio-custom"></span> Student Living
-          </label>
-        </div>
       </div>
 
       {/* Sort By */}

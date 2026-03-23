@@ -14,7 +14,6 @@ function App() {
   const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const [filters, setFilters] = useState({
-    stayType: '',
     sortBy: '',
     sharingType: '',
     gender: '',
