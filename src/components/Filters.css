@@ -1,0 +1,226 @@
+.filters-container {
+  padding: 1.5rem;
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  width: 100%;
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+}
+
+/* Custom scrollbar for filters */
+.filters-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.filters-container::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.filters-container::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 10px;
+}
+
+.filters-container::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.filters-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.filters-header h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.clear-btn {
+  background: transparent;
+  color: var(--primary);
+  font-size: 0.9rem;
+  padding: 0;
+  text-decoration: underline;
+  transition: var(--transition);
+}
+
+.clear-btn:hover {
+  color: var(--primary-hover);
+}
+
+.filter-section {
+  margin-bottom: 1.5rem;
+  padding-top: 1.5rem;
+}
+
+.border-top {
+  border-top: 1px solid var(--border);
+}
+
+.filter-section h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+/* Radio buttons & Checkboxes custom style */
+.radio-group, .checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.radio-label, .checkbox-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  transition: var(--transition);
+}
+
+.radio-label:hover, .checkbox-label:hover {
+  color: var(--text-primary);
+}
+
+.radio-label input, .checkbox-label input {
+  display: none;
+}
+
+.radio-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--text-muted);
+  margin-right: 10px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.checkbox-custom {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid var(--text-muted);
+  margin-right: 10px;
+  position: relative;
+  transition: var(--transition);
+}
+
+.radio-label input:checked + .radio-custom,
+.checkbox-label input:checked + .checkbox-custom {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+.radio-label input:checked + .radio-custom::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.checkbox-label input:checked + .checkbox-custom::after {
+  content: '\2713';
+  color: white;
+  font-size: 12px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* Price Slider */
+.price-display {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.price-slider {
+  width: 100%;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--surface);
+  height: 6px;
+  border-radius: 5px;
+  outline: none;
+}
+
+.price-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--primary);
+  cursor: pointer;
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.5);
+}
+
+/* Locality Search */
+.locality-search {
+  position: relative;
+  margin-bottom: 1rem;
+}
+
+.locality-search input {
+  width: 100%;
+  padding: 10px 10px 10px 35px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--border-radius-md);
+  color: var(--text-primary);
+  outline: none;
+  transition: var(--transition);
+}
+
+.locality-search input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+}
+
+.search-icon-small {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+}
+
+.locality-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.locality-tag {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.locality-tag:hover {
+  background: var(--primary-light);
+  color: var(--primary);
+  border-color: var(--primary);
+}
