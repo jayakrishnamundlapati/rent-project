@@ -180,8 +180,10 @@ const PORT = process.env.PORT || 3001;
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, 'dist')));
 
-app.get('*', (req, res) => {
-  if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'API route not found' });
+app.get(/(.*)/, (req, res) => {
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API route not found' });
+  }
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
