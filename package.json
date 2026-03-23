@@ -11,7 +11,7 @@
     "dev:frontend": "vite",
     "dev:backend": "node server.js",
     "start": "node server.js",
-    "build": "vite build",
+    "build": "npm rebuild sqlite3 --build-from-source && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
