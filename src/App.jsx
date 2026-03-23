@@ -2,13 +2,16 @@ import { useState, useEffect } from 'react';
 import Header from './components/Header';
 import PropertyCard from './components/PropertyCard';
 import Filters from './components/Filters';
+import Auth from './components/Auth';
 import './App.css';
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [selectedArea, setSelectedArea] = useState('');
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isFiltersOpen, setIsFiltersOpen] = useState(false);
 
   const [filters, setFilters] = useState({
     stayType: '',
@@ -111,38 +114,44 @@ function App() {
     return result;
   })();
 
+  if (!isAuthenticated) {
+    return <Auth onLoginSuccess={() => setIsAuthenticated(true)} />;
+  }
+
   return (
     <div className="app-wrapper">
-      <Header />
+      <Header onLogout={() => setIsAuthenticated(false)} />
       
       <main className="main-content">
-        <section className="hero-section">
-          <div className="container">
-            <div className="hero-content">
-              <span className="badge-new">PG Management Systems</span>
-              <h2 className="hero-title">
-                Discover Top PGs in <span className="highlight-text">Bangalore</span>
-              </h2>
-              <p className="hero-subtitle">
-                Select a location below to view all available PG accommodations loaded directly from the datasets.
-              </p>
-              
-              <div className="search-bar glass-panel">
-                <div className="search-input">
-                  <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                  <input 
-                    type="text" 
-                    placeholder="Search by location (e.g., Bellandur)..." 
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                  />
+        {!selectedArea && !searchQuery && (
+          <section className="hero-section">
+            <div className="container">
+              <div className="hero-content">
+                <span className="badge-new">PG Management Systems</span>
+                <h2 className="hero-title">
+                  Discover Top PGs in <span className="highlight-text">Bangalore</span>
+                </h2>
+                <p className="hero-subtitle">
+                  Select a location below to view all available PG accommodations loaded directly from the datasets.
+                </p>
+                
+                <div className="search-bar glass-panel">
+                  <div className="search-input">
+                    <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    <input 
+                      type="text" 
+                      placeholder="Search by location (e.g., Bellandur)..." 
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onKeyPress={handleKeyPress}
+                    />
+                  </div>
+                  <button className="btn-primary search-btn" onClick={handleSearch}>Search</button>
                 </div>
-                <button className="btn-primary search-btn" onClick={handleSearch}>Search</button>
               </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         <section className="properties-section container">
           {!selectedArea && !searchQuery ? (
@@ -194,26 +203,63 @@ function App() {
           ) : (
             // SECOND VIEW: PROPERTIES IN THAT LOCATION
             <div>
-              <div className="section-header">
-                <div>
-                  <h2 className="section-title">
-                    {searchQuery ? 'Search Results' : `${selectedArea} Properties`}
-                  </h2>
-                  <p className="section-desc">Showing {filteredProperties.length} stunning PGs.</p>
+              <div className="section-header" style={{ marginBottom: '2rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                  
+                  {/* Left Area: Filter Toggle */}
+                  <div style={{ width: '200px' }}>
+                    <button 
+                      onClick={() => setIsFiltersOpen(!isFiltersOpen)}
+                      className="btn-secondary"
+                      style={{ 
+                        padding: '8px 14px', 
+                        fontSize: '1.5rem', 
+                        borderRadius: '8px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        lineHeight: 1,
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid var(--border)'
+                      }}
+                      title="Toggle Filters"
+                    >
+                      <span style={{
+                        display: 'inline-block',
+                        transition: 'transform 0.4s ease',
+                        transform: isFiltersOpen ? 'rotate(90deg)' : 'rotate(0deg)'
+                      }}>
+                        {isFiltersOpen ? '✕' : '☰'}
+                      </span>
+                    </button>
+                  </div>
+                  
+                  {/* Center Area: Title and Subtitle */}
+                  <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                    <h2 className="section-title" style={{ marginBottom: '5px' }}>
+                      {searchQuery ? 'Search Results' : `${selectedArea} Properties`}
+                    </h2>
+                    <p className="section-desc" style={{ margin: 0 }}>Showing {filteredProperties.length} stunning PGs.</p>
+                  </div>
+                  
+                  {/* Right Area: Back Button */}
+                  <div style={{ width: '200px', textAlign: 'right' }}>
+                    <button 
+                       className="btn-secondary" 
+                       onClick={() => { setSelectedArea(''); setSearchQuery(''); }}
+                    >
+                      ← Back
+                    </button>
+                  </div>
+                  
                 </div>
-                
-                <button 
-                   className="btn-secondary" 
-                   onClick={() => { setSelectedArea(''); setSearchQuery(''); }}
-                >
-                  ← Back to All Locations
-                </button>
               </div>
 
               <div className="layout-with-sidebar" style={{ display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'flex-start' }}>
-                <aside style={{ width: '280px', flexShrink: 0, position: 'sticky', top: '2rem' }}>
-                  <Filters filters={filters} setFilters={setFilters} />
-                </aside>
+                {isFiltersOpen && (
+                  <aside style={{ width: '280px', flexShrink: 0, position: 'sticky', top: '2rem', transition: 'all 0.3s' }}>
+                    <Filters filters={filters} setFilters={setFilters} />
+                  </aside>
+                )}
                 
                 <div className="properties-grid" style={{ flexGrow: 1 }}>
                   {loading ? (
