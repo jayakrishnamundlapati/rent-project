@@ -218,7 +218,6 @@ function App() {
                       }}>
                         {isFiltersOpen ? '✕' : '☰'}
                       </span>
-                      <span>{isFiltersOpen ? 'Close Filters' : 'Show Filters'}</span>
                     </button>
                   </div>
                   

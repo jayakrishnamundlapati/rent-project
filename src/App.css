@@ -305,17 +305,35 @@
   }
   
   .results-header-container {
-    flex-direction: column;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-between;
     gap: 16px;
   }
   
-  .results-header-left, .results-header-right, .results-header-center {
-    width: 100%;
-    text-align: center;
-  }
-  
   .results-header-left, .results-header-right {
+    width: auto;
     display: flex;
     justify-content: center;
+  }
+  
+  .results-header-center {
+    width: 100%;
+    text-align: center;
+    order: 3;
+  }
+
+  .properties-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .property-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .property-image {
+    height: 250px;
   }
 }
