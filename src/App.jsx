@@ -202,24 +202,13 @@ function App() {
           ) : (
             // SECOND VIEW: PROPERTIES IN THAT LOCATION
             <div>
-              <div className="section-header" style={{ marginBottom: '2rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+              <div className="results-header-container">
                   
                   {/* Left Area: Filter Toggle */}
-                  <div style={{ width: '200px' }}>
+                  <div className="results-header-left">
                     <button 
                       onClick={() => setIsFiltersOpen(!isFiltersOpen)}
-                      className="btn-secondary"
-                      style={{ 
-                        padding: '8px 14px', 
-                        fontSize: '1.5rem', 
-                        borderRadius: '8px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        lineHeight: 1,
-                        background: 'rgba(255, 255, 255, 0.05)',
-                        border: '1px solid var(--border)'
-                      }}
+                      className="btn-secondary filter-toggle-btn"
                       title="Toggle Filters"
                     >
                       <span style={{
@@ -229,11 +218,12 @@ function App() {
                       }}>
                         {isFiltersOpen ? '✕' : '☰'}
                       </span>
+                      <span>{isFiltersOpen ? 'Close Filters' : 'Show Filters'}</span>
                     </button>
                   </div>
                   
                   {/* Center Area: Title and Subtitle */}
-                  <div style={{ textAlign: 'center', flexGrow: 1 }}>
+                  <div className="results-header-center">
                     <h2 className="section-title" style={{ marginBottom: '5px' }}>
                       {searchQuery ? 'Search Results' : `${selectedArea} Properties`}
                     </h2>
@@ -241,7 +231,7 @@ function App() {
                   </div>
                   
                   {/* Right Area: Back Button */}
-                  <div style={{ width: '200px', textAlign: 'right' }}>
+                  <div className="results-header-right">
                     <button 
                        className="btn-secondary" 
                        onClick={() => { setSelectedArea(''); setSearchQuery(''); }}
@@ -250,12 +240,11 @@ function App() {
                     </button>
                   </div>
                   
-                </div>
               </div>
 
-              <div className="layout-with-sidebar" style={{ display: 'flex', gap: '2rem', marginTop: '2rem', alignItems: 'flex-start' }}>
+              <div className="layout-with-sidebar">
                 {isFiltersOpen && (
-                  <aside style={{ width: '280px', flexShrink: 0, position: 'sticky', top: '2rem', transition: 'all 0.3s' }}>
+                  <aside className="filters-sidebar">
                     <Filters filters={filters} setFilters={setFilters} />
                   </aside>
                 )}
