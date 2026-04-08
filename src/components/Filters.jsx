@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import './Filters.css';
 
-const Filters = ({ filters, setFilters }) => {
+const Filters = ({ filters, setFilters, onApply }) => {
 
   const handleClear = () => {
     setFilters({
@@ -9,8 +9,7 @@ const Filters = ({ filters, setFilters }) => {
       sharingType: '',
       gender: '',
       price: 60000,
-      amenities: [],
-      localitySearch: ''
+      amenities: []
     });
   };
 
@@ -127,28 +126,15 @@ const Filters = ({ filters, setFilters }) => {
         </div>
       </div>
 
-      {/* Locality */}
-      <div className="filter-section border-top">
-        <h4>Locality</h4>
-        <div className="locality-search">
-          <svg className="icon search-icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-          <input 
-            type="text" 
-            placeholder="Search Localities"
-            value={filters.localitySearch}
-            onChange={(e) => handleChange('localitySearch', e.target.value)}
-          />
-        </div>
-        <div className="locality-tags">
-          {['Bellandur', 'Electronic City', 'K.R Puram', 'Varthur', 'Yelahanka', 'Kaggadasapura', 'Brookefield', 'Whitefield'].map(area => (
-            <span 
-              key={area} 
-              className="locality-tag" 
-              onClick={() => handleChange('localitySearch', area)}>
-              {area}
-            </span>
-          ))}
-        </div>
+
+      <div className="filter-section border-top" style={{ borderBottom: 'none', paddingBottom: 0 }}>
+        <button 
+          className="btn-primary" 
+          onClick={onApply} 
+          style={{ width: '100%', padding: '0.8rem', fontWeight: 'bold' }}
+        >
+          Apply Filters
+        </button>
       </div>
     </div>
   );

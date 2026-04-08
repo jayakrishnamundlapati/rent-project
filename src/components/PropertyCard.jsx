@@ -1,10 +1,50 @@
 import React, { useState } from 'react';
+import { Heart, ChevronLeft, ChevronRight, Star, MapPin, Check, Phone, Calendar } from 'lucide-react';
 import './PropertyCard.css';
 
-const PropertyCard = ({ property }) => {
+const PropertyCard = ({ property, isSaved, onToggleSave }) => {
   const [showDetails, setShowDetails] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [imageIdx, setImageIdx] = useState(0);
+
+  // MOCK CAROUSEL IMAGES
+  const images = property.images || [
+    property.image || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&q=80',
+    'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=500&q=80',
+    'https://images.unsplash.com/photo-1502672260266-1c1de2d93688?w=500&q=80'
+  ];
+
+  const nextImage = (e) => {
+    e.stopPropagation();
+    setImageIdx((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+  const prevImage = (e) => {
+    e.stopPropagation();
+    setImageIdx((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
+  // MOCKS
+  const generateHash = (str) => {
+    let hash = 0;
+    if (!str) return 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return Math.abs(hash);
+  };
+  const hashVal = generateHash((property.title || '') + (property.location || ''));
+  const isUrgent = hashVal % 4 === 0;
+  let computedRating = 3.5 + (hashVal % 16) / 10;
+  if (computedRating > 5.0) computedRating = 5.0;
+  const rating = computedRating.toFixed(1);
+  const reviewsCount = 12 + (hashVal % 120);
   
-  // Parse the raw CSV data we stored in SQL
+  // Custom mock commute distance based on area
+  const commute = {
+    'Bellandur': '2.5 km to RMZ Ecospace',
+    'Electronic City': '10 mins to Infosys Campus',
+    'Whitefield': '3 km to ITPL',
+    'K.R Puram': '5 mins to KR Puram Station'
+  }[property.area_name] || '1.2 km to nearest Tech Park';
+
   let rawData = {};
   if (property.details) {
     try {
@@ -13,57 +53,132 @@ const PropertyCard = ({ property }) => {
       console.error(e);
     }
   }
+
   return (
-    <div className="property-card">
-      <div className="property-image-container">
-        <img src={property.image} alt={property.title} className="property-image" />
-        {property.featured && <span className="badge featured">Premium</span>}
-        <div className="price-tag">{property.price}</div>
-      </div>
-      
-      <div className="property-content">
-        <h3 className="property-title">{property.title}</h3>
-        <p className="property-location">
-          <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-          {property.location}
-        </p>
-        
-        <div className="property-features">
-          <div className="feature">
-            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
-            <span>{property.bedrooms} Beds</span>
-          </div>
-          <div className="feature">
-            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-            <span>{property.bathrooms} Baths</span>
-          </div>
-          <div className="feature">
-            <svg className="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-            <span>{property.area}</span>
-          </div>
+    <>
+      <div className="property-card">
+        <div className="property-image-container">
+          {/* Image Slider */}
+          <img 
+            src={images[imageIdx]} 
+            alt={property.title} 
+            className="property-image"
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=500&q=80';
+            }}
+          />
+          
+          <button className="carousel-btn left" onClick={prevImage}><ChevronLeft size={20}/></button>
+          <button className="carousel-btn right" onClick={nextImage}><ChevronRight size={20}/></button>
+
+          {/* Badges */}
+          {property.featured && <span className="badge featured">Premium</span>}
+          {isUrgent && <span className="badge urgent">🔥 1 Bed Left!</span>}
+          
+          {/* Heart/Wishlist Button */}
+          <button 
+            className={`wishlist-btn ${isSaved ? 'saved' : ''}`}
+            onClick={() => onToggleSave(property)}
+          >
+            <Heart size={20} fill={isSaved ? '#EF4444' : 'none'} color={isSaved ? '#EF4444' : '#fff'} />
+          </button>
+
+          <div className="price-tag">{property.price}</div>
         </div>
         
-        <button 
-          className="btn-outline view-details-btn" 
-          onClick={() => setShowDetails(!showDetails)}
-        >
-          {showDetails ? 'Hide Details' : 'View Details'}
-        </button>
-
-        {showDetails && (
-          <div className="extended-details" style={{ marginTop: '20px', padding: '15px', background: 'rgba(255,255,255,0.05)', borderRadius: '8px' }}>
-            <h4 style={{ marginBottom: '10px', color: '#fff' }}>Extracted Data from CSV</h4>
-            <ul style={{ listStyleType: 'none', fontSize: '0.85rem', color: '#cbd5e1' }}>
-              {Object.entries(rawData).map(([key, value]) => (
-                <li key={key} style={{ marginBottom: '5px' }}>
-                  <strong style={{ color: '#4F46E5', textTransform: 'capitalize' }}>{key.replace('_', ' ')}:</strong> {value || 'N/A'}
-                </li>
-              ))}
-            </ul>
+        <div className="property-content">
+          <div className="card-header">
+            <h3 className="property-title">{property.title}</h3>
+            <div className="rating-badge">
+              <Star size={14} fill="#F59E0B" color="#F59E0B"/> {rating} ({reviewsCount})
+            </div>
           </div>
-        )}
+
+          <p className="property-location">
+            <MapPin size={16} />
+            {property.location}
+          </p>
+
+          <p className="commute-info">
+            <Check size={14} color="#10B981" /> {commute}
+          </p>
+          
+          <div className="property-features">
+            <div className="feature">
+              <span>🛏️ {property.bedrooms} Beds</span>
+            </div>
+            <div className="feature">
+              <span>🚿 {property.bathrooms} Baths</span>
+            </div>
+            <div className="feature">
+              <span>📐 {property.area}</span>
+            </div>
+          </div>
+          
+          <div className="action-buttons">
+            <button 
+              className="btn-outline view-details-btn" 
+              onClick={() => setShowDetails(!showDetails)}
+            >
+              {showDetails ? 'Hide' : 'Details'}
+            </button>
+            <button 
+              className="btn-primary visit-btn"
+              onClick={() => setShowModal(true)}
+            >
+              Schedule Visit
+            </button>
+          </div>
+
+          {showDetails && (
+            <div className="extended-details">
+              <h4>Property Details</h4>
+              <ul>
+                {Object.entries(rawData).map(([key, value]) => (
+                  <li key={key}>
+                    <strong>{key.replace('_', ' ')}:</strong> {value || 'N/A'}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+
+      {/* Schedule Visit Modal */}
+      {showModal && (
+        <div className="modal-overlay" onClick={() => setShowModal(false)}>
+          <div className="schedule-modal glass-panel" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>Contact Owner / Schedule Visit</h3>
+              <button className="close-btn" onClick={() => setShowModal(false)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>You are requesting a visit for <strong>{property.title}</strong> in {property.location}.</p>
+              <form className="visit-form" onSubmit={(e) => { e.preventDefault(); alert('Visit Scheduled! The owner will contact you shortly.'); setShowModal(false); }}>
+                <div className="form-group">
+                  <label>Your Name</label>
+                  <input type="text" placeholder="John Doe" required />
+                </div>
+                <div className="form-group">
+                  <label>Phone Number</label>
+                  <input type="tel" placeholder="+91 9876543210" required />
+                </div>
+                <div className="form-group">
+                  <label>Date of Visit</label>
+                  <input type="date" required />
+                </div>
+                <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '10px'}}>
+                  <Phone size={18} style={{marginRight: '8px', verticalAlign: 'middle'}}/>
+                  Request Callback
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -11,6 +11,10 @@
   animation: slideDown 0.5s ease-out;
 }
 
+body.light-mode .app-header {
+  background: rgba(255, 255, 255, 0.8);
+}
+
 .header-container {
   max-width: 1280px;
   margin: 0 auto;
@@ -30,41 +34,43 @@
   color: var(--primary);
 }
 
-.nav-links {
-  display: flex;
-  gap: 32px;
-}
-
-.nav-links a {
-  font-size: 1rem;
-  font-weight: 500;
-  color: var(--text-secondary);
-  position: relative;
-}
-
-.nav-links a:hover, .nav-links a.active {
-  color: var(--text-primary);
-}
-
-.nav-links a::after {
-  content: '';
-  position: absolute;
-  bottom: -4px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background: var(--primary);
-  transition: var(--transition);
-  border-radius: 2px;
-}
-
-.nav-links a:hover::after, .nav-links a.active::after {
-  width: 100%;
-}
-
 .auth-buttons {
   display: flex;
   gap: 16px;
+  align-items: center;
+}
+
+.icon-btn {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.icon-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+body.light-mode .icon-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.wishlist-badge {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  background: #EF4444;
+  color: white;
+  font-size: 0.7rem;
+  border-radius: 10px;
+  padding: 2px 6px;
+  font-weight: bold;
 }
 
 @keyframes slideDown {
@@ -78,14 +84,8 @@
   }
 }
 
-@media (max-width: 900px) {
-  .nav-links {
-    display: none;
-  }
-}
-
 @media (max-width: 600px) {
-  .auth-buttons {
+  .btn-secondary {
     display: none;
   }
 }

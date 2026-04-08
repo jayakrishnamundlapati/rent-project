@@ -141,8 +141,8 @@ app.get('/api/properties', async (req, res) => {
   let params = [];
   
   if (search) {
-     sql += ' WHERE location LIKE ? OR title LIKE ?';
-     params = [`%${search}%`, `%${search}%`];
+     sql += ' WHERE location LIKE ? OR title LIKE ? OR area_name LIKE ?';
+     params = [`%${search}%`, `%${search}%`, `%${search}%`];
   }
 
   db.all(sql, params, (err, rows) => {
