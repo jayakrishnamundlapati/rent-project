@@ -31,7 +31,13 @@ const Filters = ({ filters, setFilters, onApply }) => {
     <div className="filters-container glass-panel">
       <div className="filters-header">
         <h3>Filters</h3>
-        <button className="clear-btn" onClick={handleClear}>Clear Filters</button>
+        <button 
+          className="clear-btn" 
+          onClick={handleClear}
+          style={{ color: '#EF4444', fontWeight: 'bold', background: 'rgba(239, 68, 68, 0.15)', padding: '6px 12px', borderRadius: '6px', fontSize: '0.85rem' }}
+        >
+          Clear All
+        </button>
       </div>
 
       {/* Sort By */}

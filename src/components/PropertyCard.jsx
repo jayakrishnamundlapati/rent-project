@@ -1,11 +1,33 @@
 import React, { useState } from 'react';
 import { Heart, ChevronLeft, ChevronRight, Star, MapPin, Check, Phone, Calendar } from 'lucide-react';
 import './PropertyCard.css';
+import './PropertyCard.css';
 
-const PropertyCard = ({ property, isSaved, onToggleSave }) => {
+export const SkeletonCard = () => (
+  <div className="skeleton">
+    <div className="skeleton-img shimmer"></div>
+    <div className="skeleton-content">
+      <div className="skeleton-text title shimmer"></div>
+      <div className="skeleton-text medium shimmer"></div>
+      <div className="skeleton-text short shimmer" style={{ marginBottom: '24px' }}></div>
+      <div className="skeleton-row">
+        <div className="skeleton-text shimmer"></div>
+        <div className="skeleton-text shimmer"></div>
+        <div className="skeleton-text shimmer"></div>
+      </div>
+      <div className="skeleton-row" style={{ marginTop: 'auto', marginBottom: 0 }}>
+        <div className="skeleton-text btn shimmer"></div>
+        <div className="skeleton-text btn shimmer"></div>
+      </div>
+    </div>
+  </div>
+);
+
+const PropertyCard = ({ property, isSaved, onToggleSave, onScheduleVisit, idx = 0 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [imageIdx, setImageIdx] = useState(0);
+  const [visitDate, setVisitDate] = useState('');
 
   // MOCK CAROUSEL IMAGES
   const images = property.images || [
@@ -55,7 +77,7 @@ const PropertyCard = ({ property, isSaved, onToggleSave }) => {
 
   return (
     <>
-      <div className="property-card">
+      <div className="property-card" style={{ animation: `fadeUp 0.5s ease-out backwards`, animationDelay: `${idx * 0.08}s` }}>
         <div className="property-image-container">
           {/* Image Slider */}
           <img 
@@ -78,6 +100,7 @@ const PropertyCard = ({ property, isSaved, onToggleSave }) => {
           <button 
             className={`wishlist-btn ${isSaved ? 'saved' : ''}`}
             onClick={() => onToggleSave(property)}
+            data-tip={isSaved ? "Remove from Wishlist" : "Add to Wishlist"}
           >
             <Heart size={20} fill={isSaved ? '#EF4444' : 'none'} color={isSaved ? '#EF4444' : '#fff'} />
           </button>
@@ -154,7 +177,15 @@ const PropertyCard = ({ property, isSaved, onToggleSave }) => {
             </div>
             <div className="modal-body">
               <p>You are requesting a visit for <strong>{property.title}</strong> in {property.location}.</p>
-              <form className="visit-form" onSubmit={(e) => { e.preventDefault(); alert('Visit Scheduled! The owner will contact you shortly.'); setShowModal(false); }}>
+              <form className="visit-form" onSubmit={(e) => { 
+                  e.preventDefault(); 
+                  if(onScheduleVisit) {
+                    onScheduleVisit(property, visitDate);
+                  } else {
+                    alert('Visit Scheduled! The owner will contact you shortly.'); 
+                  }
+                  setShowModal(false); 
+                }}>
                 <div className="form-group">
                   <label>Your Name</label>
                   <input type="text" placeholder="John Doe" required />
@@ -165,7 +196,7 @@ const PropertyCard = ({ property, isSaved, onToggleSave }) => {
                 </div>
                 <div className="form-group">
                   <label>Date of Visit</label>
-                  <input type="date" required />
+                  <input type="date" required value={visitDate} onChange={(e) => setVisitDate(e.target.value)} />
                 </div>
                 <button type="submit" className="btn-primary" style={{width: '100%', marginTop: '10px'}}>
                   <Phone size={18} style={{marginRight: '8px', verticalAlign: 'middle'}}/>
