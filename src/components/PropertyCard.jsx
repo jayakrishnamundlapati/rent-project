@@ -31,7 +31,6 @@ const PropertyCard = ({ property, isSaved, onToggleSave }) => {
     return Math.abs(hash);
   };
   const hashVal = generateHash((property.title || '') + (property.location || ''));
-  const isUrgent = hashVal % 4 === 0;
   let computedRating = 3.5 + (hashVal % 16) / 10;
   if (computedRating > 5.0) computedRating = 5.0;
   const rating = computedRating.toFixed(1);
@@ -74,7 +73,6 @@ const PropertyCard = ({ property, isSaved, onToggleSave }) => {
 
           {/* Badges */}
           {property.featured && <span className="badge featured">Premium</span>}
-          {isUrgent && <span className="badge urgent">🔥 1 Bed Left!</span>}
           
           {/* Heart/Wishlist Button */}
           <button 
