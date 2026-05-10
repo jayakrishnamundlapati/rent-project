@@ -6,54 +6,115 @@ import './Auth.css';
 const Auth = ({ onLoginSuccess }) => {
   const [view, setView] = useState('login'); // 'login', 'signup', 'forgot'
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   
   // Form States
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
 
-  // Load existing mock users from localStorage to simulate a database
-  const getRegisteredUsers = () => {
-    const users = localStorage.getItem('registeredUsers');
-    return users ? JSON.parse(users) : [];
+  // Dynamic API URL based on environment
+  const getAPIURL = () => {
+    const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const API_BASE_URL = isDev ? 'http://localhost:5000' : '';
+    return `${API_BASE_URL}/api/auth`;
   };
-  const handleSignup = (e) => {
+
+  const API_URL = getAPIURL();
+
+  const handleSignup = async (e) => {
     e.preventDefault();
-    if (!name || !email || !phone || !password) {
+    if (!name || !email || !phone || !password || !confirmPassword) {
       toast.error('Please fill out all fields.');
       return;
     }
-    
-    const users = getRegisteredUsers();
-    // Check if user already exists
-    if (users.find(u => u.email === email || u.phone === phone)) {
-      toast.error('An account with this email/phone already exists.');
+
+    if (password !== confirmPassword) {
+      toast.error('Passwords do not match.');
       return;
     }
 
-    const newUser = { name, email, phone, password }; // Storing password raw just for mock UI purposes
-    users.push(newUser);
-    localStorage.setItem('registeredUsers', JSON.stringify(users));
-    
-    toast.success('Account created successfully! Logging you in...');
-    onLoginSuccess({ name, email, phone });
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/signup`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies
+        body: JSON.stringify({ name, email, phone, password, confirmPassword })
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || 'Signup failed');
+        return;
+      }
+
+      toast.success('Account created successfully! Logging you in...');
+      onLoginSuccess({
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone
+      });
+
+      // Reset form
+      setName('');
+      setEmail('');
+      setPhone('');
+      setPassword('');
+      setConfirmPassword('');
+    } catch (error) {
+      console.error('Signup error:', error);
+      toast.error('Network error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       toast.error('Please enter your email and password.');
       return;
     }
 
-    const users = getRegisteredUsers();
-    const user = users.find(u => u.email === email && u.password === password);
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include', // Include cookies
+        body: JSON.stringify({ email, password })
+      });
 
-    if (user) {
-      onLoginSuccess({ name: user.name, email: user.email, phone: user.phone });
-    } else {
-      toast.error('Invalid email or password. Please try again.');
+      const data = await response.json();
+
+      if (!response.ok) {
+        toast.error(data.message || 'Login failed');
+        return;
+      }
+
+      toast.success('Login successful!');
+      onLoginSuccess({
+        name: data.user.name,
+        email: data.user.email,
+        phone: data.user.phone
+      });
+
+      // Reset form
+      setEmail('');
+      setPassword('');
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error('Network error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,6 +131,7 @@ const Auth = ({ onLoginSuccess }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          disabled={loading}
         />
       </div>
       
@@ -82,6 +144,7 @@ const Auth = ({ onLoginSuccess }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
+            disabled={loading}
             style={{ width: '100%', paddingRight: '40px' }}
           />
           <button 
@@ -94,11 +157,13 @@ const Auth = ({ onLoginSuccess }) => {
         </div>
       </div>
       
-      <button type="submit" className="btn-primary w-100 mb-3">Login</button>
+      <button type="submit" className="btn-primary w-100 mb-3" disabled={loading}>
+        {loading ? 'Logging in...' : 'Login'}
+      </button>
       
       <div className="auth-links">
-        <button type="button" className="link-btn" onClick={() => setView('forgot')}>Forgot Password?</button>
-        <p>Don't have an account? <button type="button" className="link-btn highlight" onClick={() => { setView('signup'); setEmail(''); setPassword(''); }}>Sign Up</button></p>
+        <button type="button" className="link-btn" onClick={() => setView('forgot')} disabled={loading}>Forgot Password?</button>
+        <p>Don't have an account? <button type="button" className="link-btn highlight" onClick={() => { setView('signup'); setEmail(''); setPassword(''); }} disabled={loading}>Sign Up</button></p>
       </div>
     </form>
   );
@@ -116,6 +181,7 @@ const Auth = ({ onLoginSuccess }) => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           required 
+          disabled={loading}
         />
       </div>
 
@@ -127,6 +193,7 @@ const Auth = ({ onLoginSuccess }) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required 
+          disabled={loading}
         />
       </div>
 
@@ -141,6 +208,7 @@ const Auth = ({ onLoginSuccess }) => {
             onChange={(e) => setPhone(e.target.value.replace(/\D/g, ''))}
             maxLength="10"
             required
+            disabled={loading}
           />
         </div>
       </div>
@@ -150,10 +218,11 @@ const Auth = ({ onLoginSuccess }) => {
         <div style={{ position: 'relative' }}>
           <input 
             type={showPassword ? "text" : "password"} 
-            placeholder="Create a password" 
+            placeholder="Create a password (min 6 characters)" 
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required 
+            disabled={loading}
             style={{ width: '100%', paddingRight: '40px' }}
           />
           <button 
@@ -165,11 +234,28 @@ const Auth = ({ onLoginSuccess }) => {
           </button>
         </div>
       </div>
+
+      <div className="form-group">
+        <label>Confirm Password</label>
+        <div style={{ position: 'relative' }}>
+          <input 
+            type={showPassword ? "text" : "password"} 
+            placeholder="Confirm your password" 
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required 
+            disabled={loading}
+            style={{ width: '100%', paddingRight: '40px' }}
+          />
+        </div>
+      </div>
       
-      <button type="submit" className="btn-primary w-100 mb-3">Create Account</button>
+      <button type="submit" className="btn-primary w-100 mb-3" disabled={loading}>
+        {loading ? 'Creating Account...' : 'Create Account'}
+      </button>
       
       <div className="auth-links">
-        <p>Already have an account? <button type="button" className="link-btn highlight" onClick={() => { setView('login'); setEmail(''); setPassword(''); }}>Log In</button></p>
+        <p>Already have an account? <button type="button" className="link-btn highlight" onClick={() => { setView('login'); setEmail(''); setPassword(''); }} disabled={loading}>Log In</button></p>
       </div>
     </form>
   );
@@ -181,13 +267,13 @@ const Auth = ({ onLoginSuccess }) => {
       
       <div className="form-group">
         <label>Email Address</label>
-        <input type="email" placeholder="Enter your email" required />
+        <input type="email" placeholder="Enter your email" required disabled={loading} />
       </div>
       
-      <button type="submit" className="btn-primary w-100 mb-3">Send Reset Link</button>
+      <button type="submit" className="btn-primary w-100 mb-3" disabled={loading}>Send Reset Link</button>
       
       <div className="auth-links">
-        <button type="button" className="link-btn" onClick={() => setView('login')}>← Back to Login</button>
+        <button type="button" className="link-btn" onClick={() => setView('login')} disabled={loading}>← Back to Login</button>
       </div>
     </form>
   );

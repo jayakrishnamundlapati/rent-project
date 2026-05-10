@@ -35,10 +35,15 @@ function App() {
     amenities: []
   });
 
+  // Helper function to get user-specific localStorage key
+  const getUserKey = (key) => {
+    return user?.id ? `${key}_${user.id}` : key;
+  };
+
   const fetchProperties = (query = '') => {
     setLoading(true);
     const isDev = window.location.hostname === 'localhost';
-    const API_BASE_URL = isDev ? 'http://localhost:3001' : '';
+    const API_BASE_URL = isDev ? 'http://localhost:5000' : '';
     const url = query ? `${API_BASE_URL}/api/properties?search=${query}` : `${API_BASE_URL}/api/properties`;
     
     fetch(url)
@@ -56,16 +61,20 @@ function App() {
   useEffect(() => {
     fetchProperties();
     // Load local storage states
-    const saved = localStorage.getItem('wishlist');
-    if (saved) setSavedProperties(JSON.parse(saved));
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'light') setIsDark(false);
     
     const savedUser = localStorage.getItem('user');
-    if (savedUser) setUser(JSON.parse(savedUser));
-    
-    const savedVisits = localStorage.getItem('scheduledVisits');
-    if (savedVisits) setScheduledVisits(JSON.parse(savedVisits));
+    if (savedUser) {
+      const parsedUser = JSON.parse(savedUser);
+      setUser(parsedUser);
+      // Load user-specific data after setting user
+      const userWishlist = localStorage.getItem(getUserKey('wishlist'));
+      if (userWishlist) setSavedProperties(JSON.parse(userWishlist));
+      
+      const userVisits = localStorage.getItem(getUserKey('scheduledVisits'));
+      if (userVisits) setScheduledVisits(JSON.parse(userVisits));
+    }
 
     // Scroll listener
     const checkScrollTop = () => {
@@ -93,19 +102,65 @@ function App() {
     }
   }, [isDark]);
 
+  // Load user-specific data when user changes
+  useEffect(() => {
+    if (user?.id) {
+      const userWishlist = localStorage.getItem(`wishlist_${user.id}`);
+      if (userWishlist) {
+        setSavedProperties(JSON.parse(userWishlist));
+      } else {
+        setSavedProperties([]);
+      }
+      
+      const userVisits = localStorage.getItem(`scheduledVisits_${user.id}`);
+      if (userVisits) {
+        setScheduledVisits(JSON.parse(userVisits));
+      } else {
+        setScheduledVisits([]);
+      }
+    }
+  }, [user?.id]);
+
   const handleLoginSuccess = (userData) => {
     if (userData) {
       setUser(userData);
       localStorage.setItem('user', JSON.stringify(userData));
+      
+      // Load user-specific wishlist and visits
+      const userWishlist = localStorage.getItem(`wishlist_${userData.id}`);
+      if (userWishlist) {
+        setSavedProperties(JSON.parse(userWishlist));
+      } else {
+        setSavedProperties([]); // Clear wishlist for new user
+      }
+      
+      const userVisits = localStorage.getItem(`scheduledVisits_${userData.id}`);
+      if (userVisits) {
+        setScheduledVisits(JSON.parse(userVisits));
+      } else {
+        setScheduledVisits([]); // Clear visits for new user
+      }
     }
     setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    // Clear user-specific data
+    localStorage.removeItem('user');
+    setUser({ name: 'Guest User', phone: '+91 0000000000' });
+    setSavedProperties([]);
+    setScheduledVisits([]);
+    setIsAuthenticated(false);
+    setShowProfile(false);
+    setShowWishlist(false);
   };
 
   const handleToggleSave = (property) => {
     setSavedProperties(prev => {
       const isAlreadySaved = prev.some(p => p.id === property.id);
       const updated = isAlreadySaved ? prev.filter(p => p.id !== property.id) : [...prev, property];
-      localStorage.setItem('wishlist', JSON.stringify(updated));
+      // Save to user-specific localStorage key
+      localStorage.setItem(getUserKey('wishlist'), JSON.stringify(updated));
       return updated;
     });
   };
@@ -114,7 +169,7 @@ function App() {
     const newVisit = { property, date, status: 'Upcoming' };
     setScheduledVisits(prev => {
       const updated = [...prev, newVisit];
-      localStorage.setItem('scheduledVisits', JSON.stringify(updated));
+      localStorage.setItem(getUserKey('scheduledVisits'), JSON.stringify(updated));
       return updated;
     });
     toast.success('Visit successfully scheduled! The owner will be notified.', {
@@ -190,7 +245,7 @@ function App() {
     <div className="app-wrapper">
       <Toaster />
       <Header 
-        onLogout={() => setIsAuthenticated(false)} 
+        onLogout={handleLogout} 
         isDark={isDark}
         onToggleTheme={() => setIsDark(!isDark)}
         savedCount={savedProperties.length}
@@ -225,7 +280,7 @@ function App() {
                    </p>
                 </div>
                 <button className="btn-primary" style={{ width: '100%', marginBottom: '12px' }} onClick={() => { setShowProfile(false); setShowWishlist(true); }}>View My Wishlist</button>
-                <button className="btn-secondary" style={{ width: '100%' }} onClick={() => { setIsAuthenticated(false); setShowProfile(false); }}>Sign Out</button>
+                <button className="btn-secondary" style={{ width: '100%' }} onClick={handleLogout}>Sign Out</button>
               </div>
 
               {/* Main Content Area */}

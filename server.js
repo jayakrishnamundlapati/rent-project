@@ -6,17 +6,65 @@ import csv from 'csv-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import os from 'os';
+import mongoose from 'mongoose';
+import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
+import authRoutes from './routes/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// Load environment variables
+dotenv.config();
 
 // Use /tmp/ on Vercel since other folders are read-only in Serverless Functions
 const dbPath = process.env.VERCEL ? path.join(os.tmpdir(), 'database.sqlite') : path.join(__dirname, 'database.sqlite');
 const db = new sqlite3.Database(dbPath);
 
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: function(origin, callback) {
+    // Allow localhost on any port during development
+    if (process.env.NODE_ENV === 'production') {
+      if (origin === process.env.FRONTEND_URL) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    } else {
+      // Development: allow localhost and 127.0.0.1 on any port
+      if (!origin || origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168')) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+app.use(cookieParser());
+
+// MongoDB Connection
+const connectDB = async () => {
+  try {
+    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/rent-project', {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+    console.log('MongoDB connected successfully');
+  } catch (error) {
+    console.error('MongoDB connection error:', error.message);
+    process.exit(1);
+  }
+};
+
+connectDB();
+
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 const filesToProcess = [
   'Bellandur.csv',
@@ -175,7 +223,7 @@ app.get('/api/debug', (req, res) => {
   }
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.BACKEND_PORT || 5000;
 
 // Serve frontend static files
 app.use(express.static(path.join(__dirname, 'dist')));
