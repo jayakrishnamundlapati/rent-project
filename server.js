@@ -4,7 +4,6 @@ import fs from 'fs';
 import csv from 'csv-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import os from 'os';
 import mongoose from 'mongoose';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
